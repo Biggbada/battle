@@ -7,7 +7,7 @@ class Player
     public float $health;
     public string $comment;
 
-    public function __construct(string $name, int $power, int $mana, int $health)
+    public function __construct(string $name, int $power = 100, int $mana = 100, int $health = 100)
     {
         $this->name = $name;
         $this->power = $power;
@@ -38,22 +38,5 @@ class Player
             $this->comment = "$this->name n'a plus assez de mana pour se soigner";
             return false;
         }
-    }
-}
-
-
-class Fight
-{
-    public object $player1;
-    public object $player2;
-
-    public function __construct(Player $player1, Player $player2 = null)
-    {
-        $this->player1 = $player1;
-        $this->player2 = $player2;
-    }
-
-    public function stopMatch()
-    {
     }
 }
