@@ -73,7 +73,7 @@ require './classes/db.class.php';
                 </div>
                 <div class="row mt-2">
                     <div class="d-flex justify-content-center">
-                        <input id="fight" type="submit" value="FIGHT">
+                        <input id="fight" name="fight" type="submit" value="FIGHT">
                     </div>
                 </div>
             </form>

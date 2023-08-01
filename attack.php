@@ -10,9 +10,10 @@ require './classes/db.class.php';
 $db = SPDO::getInstance();
 
 //cas d'une entrée depuis le formulaire d'inscription des  joueurs
-if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin'])) {
+if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin']) && !isset($_POST['restart'])) {
     $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante']);
     $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante']);
+
 
     $db->query('CREATE TABLE `players` (
         `playerName` VARCHAR(25) NOT NULL,
@@ -34,11 +35,11 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isse
     $dbInsertAdversaire->bindParam(':health', $_POST['adversaire-sante']);
     $dbInsertAdversaire->execute();
 
-    dump($db);
+    // dump($db);
     $selectDatas = $db->query('SELECT * FROM players');
     $datas = $selectDatas->fetchAll();
 
-    dump($datas);
+    // dump($datas);
     echo $datas[0]['playerName'];
 }
 
@@ -50,12 +51,13 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     $playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health']);
 
     $playerOne->attack($playerTwo);
-    // $_SESSION['player2'] = $playerTwo;
+    $random = rand(0, 1);
+    // dump($random);
 
-    if ($playerTwo->health < 0) {
+    if ($playerTwo->health <= 0) {
         header('Location: ./resultat.php');
     }
-    if ($playerTwo->health < 30) {
+    if (($playerTwo->health < 50) && ($random === 1)) {
         $iscured = $playerTwo->cure();
         if ($iscured === false) {
             $playerTwo->attack($playerOne);
@@ -63,7 +65,7 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     } else {
         $playerTwo->attack($playerOne);
         $_SESSION['player1'] = $playerOne;
-        if ($playerOne->health < 0) {
+        if ($playerOne->health <= 0) {
             echo "end of game";
             header('Location: ./resultat.php');
         }
@@ -91,6 +93,7 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
     }
     SPDO::updateDB($db, $playerOne, $playerTwo);
 }
+
 
 
 
@@ -174,6 +177,8 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
                 <input id="attaque" name="attaque" type="submit" value="Attaquer">
                 <input name="soin" type="submit" value="Se soigner">
             </div>
+        </form>
+        <form action="./resultat.php" method="post" id="restart" name="restart">
             <div class="d-flex justify-content-center">
                 <input id="restart" name="restart" type="submit" value="Stopper le combat">
             </div>

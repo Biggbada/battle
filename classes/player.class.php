@@ -16,8 +16,11 @@ class Player
     }
     public function attack(Player $player)
     {
-        $damage = $this->power / 4;
+        $damage = ($this->power / 10) * rand(1, 3);
         $player->health -= $damage;
+        if ($player->health < 0) {
+            $player->health = 0;
+        }
         $this->comment = "$this->name attaque $player->name et lui inflige $damage de dégats";
         // $damage = $player->power / 20;
         // $this->health -= $damage;
@@ -30,8 +33,14 @@ class Player
         if ($this->mana > 0) {
 
             $this->health += (($this->mana / 20) + 10);
+            if ($this->health > 100) {
+                $this->health = 100;
+            }
             $this->mana /= 4;
             $this->mana -= 1;
+            if ($this->mana < 0) {
+                $this->mana = 0;
+            }
             $this->comment = "$this->name s'est soigné";
             return $this;
         } else {
