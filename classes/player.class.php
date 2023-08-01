@@ -18,10 +18,10 @@ class Player
     {
         $damage = $this->power / 4;
         $player->health -= $damage;
-        $this->comment = "$this->name attaque $player->name et lui inflige $damage de dégats  \r \n";
+        $this->comment = "$this->name attaque $player->name et lui inflige $damage de dégats";
         // $damage = $player->power / 20;
         // $this->health -= $damage;
-        // echo " \r \n $player->name réplique et inflige $damage de dégat à $this->name.";
+        // echo "  $player->name réplique et inflige $damage de dégat à $this->name.";
     }
 
 

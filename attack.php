@@ -2,38 +2,63 @@
 require_once __DIR__ . '/vendor/autoload.php';
 // require './index.php';
 require './classes/player.class.php';
-session_start();
-if (isset($_SESSION['player1'])) {
-    $playerOne = $_SESSION['player1'];
-    $playerTwo = $_SESSION['player2'];
-    if (($playerOne->health < 0) || ($playerTwo->health < 0)) {
-        echo "end of game";
-        header('Location: ./resultat.php');
-    }
-}
-if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin'])) {
+require './classes/db.class.php';
 
+// session_start();
+
+
+$db = SPDO::getInstance();
+
+//cas d'une entrée depuis le formulaire d'inscription des  joueurs
+if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin'])) {
     $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante']);
     $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante']);
-    $_SESSION['player1'] = $playerOne;
-    $_SESSION['player2'] = $playerTwo;
+
+    $db->query('CREATE TABLE `players` (
+        `playerName` VARCHAR(25) NOT NULL,
+        `power` INT NOT NULL,
+        `mana` INT NOT NULL,
+        `health` INT NOT NULL,
+        `comment` VARCHAR(150) NULL DEFAULT NULL
+    )');
+    $dbInsertPlayer = $db->prepare("INSERT INTO players(playerName, power, mana, health) VALUES (:playerName, :power, :mana, :health)");
+    $dbInsertPlayer->bindParam(':playerName', $_POST['player-name']);
+    $dbInsertPlayer->bindParam(':power', $_POST['player-attaque']);
+    $dbInsertPlayer->bindParam(':mana', $_POST['player-mana']);
+    $dbInsertPlayer->bindParam(':health', $_POST['player-sante']);
+    $dbInsertPlayer->execute();
+    $dbInsertAdversaire = $db->prepare("INSERT INTO players(playerName, power, mana, health) VALUES (:playerName, :power, :mana, :health)");
+    $dbInsertAdversaire->bindParam(':playerName', $_POST['adversaire-name']);
+    $dbInsertAdversaire->bindParam(':power', $_POST['adversaire-attaque']);
+    $dbInsertAdversaire->bindParam(':mana', $_POST['adversaire-mana']);
+    $dbInsertAdversaire->bindParam(':health', $_POST['adversaire-sante']);
+    $dbInsertAdversaire->execute();
+
+    dump($db);
+    $selectDatas = $db->query('SELECT * FROM players');
+    $datas = $selectDatas->fetchAll();
+
+    dump($datas);
+    echo $datas[0]['playerName'];
 }
-// $_SESSION['fight'] = true;
+
+//cas d'une arrive depuis un clic sur attaque
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
-    $playerOne = $_SESSION['player1'];
-    $playerTwo = $_SESSION['player2'];
-    // while ($playerOne->getLifeStatus() && $playerTwo->getLifeStatus())
+    $selectDatas = $db->query('SELECT * FROM players');
+    $datas = $selectDatas->fetchAll();
+    $playerOne = new Player($datas[0]['playerName'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health']);
+    $playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health']);
+
     $playerOne->attack($playerTwo);
-    $_SESSION['player2'] = $playerTwo;
+    // $_SESSION['player2'] = $playerTwo;
 
     if ($playerTwo->health < 0) {
-        echo "end of game";
         header('Location: ./resultat.php');
     }
     if ($playerTwo->health < 30) {
         $iscured = $playerTwo->cure();
         if ($iscured === false) {
-            $playerTwo->attack();
+            $playerTwo->attack($playerOne);
         }
     } else {
         $playerTwo->attack($playerOne);
@@ -43,10 +68,15 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
             header('Location: ./resultat.php');
         }
     }
+    SPDO::updateDB($db, $playerOne, $playerTwo);
 }
+
+//cas d'une arrivée depuis un clic sur se soigner
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
-    $playerOne = $_SESSION['player1'];
-    $playerTwo = $_SESSION['player2'];
+    $selectDatas = $db->query('SELECT * FROM players');
+    $datas = $selectDatas->fetchAll();
+    $playerOne = new Player($datas[0]['playerName'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health']);
+    $playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health']);
     $isCured = $playerOne->cure();
     if ($isCured === false) {
         return;
@@ -59,7 +89,42 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
             header('Location: ./resultat.php');
         }
     }
+    SPDO::updateDB($db, $playerOne, $playerTwo);
 }
+
+
+
+// if (isset($_SESSION['player1'])) {
+//     $playerOne = $_SESSION['player1'];
+//     $playerTwo = $_SESSION['player2'];
+//     if (($playerOne->health < 0) || ($playerTwo->health < 0)) {
+//         echo "end of game";
+//         header('Location: ./resultat.php');
+//     }
+// }
+// if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin'])) {
+
+//     $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante']);
+//     $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante']);
+//     $_SESSION['player1'] = $playerOne;
+//     $_SESSION['player2'] = $playerTwo;
+// }
+// if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
+//     $playerOne = $_SESSION['player1'];
+//     $playerTwo = $_SESSION['player2'];
+//     $isCured = $playerOne->cure();
+//     if ($isCured === false) {
+//         return;
+//     } else {
+//         $playerTwo->attack($playerOne);
+//         $_SESSION['player1'] = $playerOne;
+
+//         if ($playerOne->health < 0) {
+//             echo "end of game";
+//             header('Location: ./resultat.php');
+//         }
+//     }
+// }
 ?>
 
 <div id="match" class="row gx-5">

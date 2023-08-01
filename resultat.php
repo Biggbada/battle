@@ -2,10 +2,15 @@
 require_once __DIR__ . '/vendor/autoload.php';
 // require './index.php';
 require './classes/player.class.php';
-session_start();
-$playerOne = $_SESSION['player1'];
-$playerTwo = $_SESSION['player2'];
-dump($playerOne, $playerTwo);
+require './classes/db.class.php';
+
+$db = SPDO::getInstance();
+$selectDatas = $db->query('SELECT * FROM players');
+$datas = $selectDatas->fetchAll();
+$playerOne = new Player($datas[0]['playerName'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health']);
+$playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health']);
+$db->query('DROP TABLE players');
+
 ?>
 <div id="Resultats">
     <h1>Résultat</h1>
@@ -21,7 +26,6 @@ dump($playerOne, $playerTwo);
     }
 
 
-    session_destroy();
 
     ?>
     <form class="d-flex justify-content-center" action="./index.php" method="post">

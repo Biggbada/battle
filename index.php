@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 require './classes/player.class.php';
-session_start();
+require './classes/db.class.php';
+
+
 
 
 ?>
