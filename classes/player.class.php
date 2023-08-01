@@ -21,7 +21,7 @@ class Player
         if ($player->health < 0) {
             $player->health = 0;
         }
-        $this->comment = "$this->name attaque $player->name et lui inflige $damage de dégats";
+        $this->comment = "$this->name attaque $player->name et lui inflige $damage de degats";
         // $damage = $player->power / 20;
         // $this->health -= $damage;
         // echo "  $player->name réplique et inflige $damage de dégat à $this->name.";
@@ -41,7 +41,7 @@ class Player
             if ($this->mana < 0) {
                 $this->mana = 0;
             }
-            $this->comment = "$this->name s'est soigné";
+            $this->comment = "$this->name s'est soigne";
             return $this;
         } else {
             $this->comment = "$this->name n'a plus assez de mana pour se soigner";

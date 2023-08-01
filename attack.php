@@ -40,7 +40,6 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isse
     $datas = $selectDatas->fetchAll();
 
     // dump($datas);
-    echo $datas[0]['playerName'];
 }
 
 //cas d'une arrive depuis un clic sur attaque
@@ -130,68 +129,77 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
 // }
 ?>
 
-<div id="match" class="row gx-5">
-    <h2>Match</h2>
-    <div class="col-6 ">
-        <div class="position-relative float-end">
-            <img id="player" src="https://api.dicebear.com/6.x/lorelei/svg?flip=false&seed=test" alt="Avatar" class="avatar float-end">
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+<head>
+    <title>Battle</title>
+    <link rel="stylesheet" href="public/bootstrap.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
-            </span>
-            <ul>
-                <li>Name : <?= $playerOne->name ?></li>
-                <li>Attaque : <?= $playerOne->power ?></li>
-                <li>Mana : <?= $playerOne->mana ?></li>
-                <li>Vie : <?= $playerOne->health ?></li>
-            </ul>
-        </div>
-    </div>
-    <div class="col-6" id="adversaire">
-        <div class="position-relative float-start">
-            <img src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=test2" alt="Avatar" class="avatar">
-            <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
+</head>
 
-            </span>
-            <ul>
-                <li>Name : <?= $playerTwo->name ?></li>
-                <li>Attaque : <?= $playerTwo->power ?></li>
-                <li>Mana : <?= $playerTwo->mana ?></li>
-                <li>Vie : <?= $playerTwo->health ?></li>
-            </ul>
-        </div>
-    </div>
-    <div id="combats">
-        <h2>Combat</h2>
-        <ul>
-
-
-            <?php if (isset($playerOne->comment)) { ?>
-                <li><i class="fa-solid fa-khanda p-1"><?= $playerOne->comment ?></i></li><?php } ?>
-            <?php if (isset($playerTwo->comment)) { ?>
-                <li><i class="fa-solid fa-khanda p-1"><?= $playerTwo->comment ?></i></li><?php } ?>
-            </li>
-
-        </ul>
-        <form id='actionForm' action="attack.php" method="post">
-            <div class="d-flex justify-content-center">
-                <input id="attaque" name="attaque" type="submit" value="Attaquer">
-                <input name="soin" type="submit" value="Se soigner">
+<body>
+    <div class="container">
+        <div id="match" class="row gx-5">
+            <h2>Match</h2>
+            <div class="col-6 ">
+                <div class="position-relative float-end">
+                    <img id="player" src="https://api.dicebear.com/6.x/lorelei/svg?flip=false&seed=test" alt="Avatar" class="avatar float-end">
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        <?= $playerOne->health ?>
+                    </span>
+                    <ul>
+                        <li>Name : <?= $playerOne->name ?></li>
+                        <li>Attaque : <?= $playerOne->power ?></li>
+                        <li>Mana : <?= $playerOne->mana ?></li>
+                    </ul>
+                </div>
             </div>
-        </form>
-        <form action="./resultat.php" method="post" id="restart" name="restart">
-            <div class="d-flex justify-content-center">
-                <input id="restart" name="restart" type="submit" value="Stopper le combat">
+            <div class="col-6" id="adversaire">
+                <div class="position-relative float-start">
+                    <img src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=test2" alt="Avatar" class="avatar">
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
+                        <?= $playerTwo->health ?>
+                    </span>
+                    <ul>
+                        <li>Name : <?= $playerTwo->name ?></li>
+                        <li>Attaque : <?= $playerTwo->power ?></li>
+                        <li>Mana : <?= $playerTwo->mana ?></li>
+                    </ul>
+                </div>
             </div>
-        </form>
-    </div>
-    <style>
-        .avatar {
-            vertical-align: middle;
-            width: 100px;
-            border-radius: 50%;
-        }
-    </style>
-    <!-- <script>
+            <div id="combats">
+                <h2>Combat</h2>
+                <ul>
+
+
+                    <?php if (isset($playerOne->comment)) { ?>
+                        <li><i class="fa-solid fa-khanda p-1"><?= $playerOne->comment ?></i></li><?php } ?>
+                    <?php if (isset($playerTwo->comment)) { ?>
+                        <li><i class="fa-solid fa-khanda p-1"><?= $playerTwo->comment ?></i></li><?php } ?>
+                    </li>
+
+                </ul>
+                <form id='actionForm' action="attack.php" method="post">
+                    <div class="d-flex justify-content-center">
+                        <input id="attaque" name="attaque" type="submit" value="Attaquer">
+                        <input name="soin" type="submit" value="Se soigner">
+                    </div>
+                </form>
+                <form action="./resultat.php" method="post" id="restart" name="restart">
+                    <div class="d-flex justify-content-center">
+                        <input id="restart" name="restart" type="submit" value="Stopper le combat">
+                    </div>
+                </form>
+            </div>
+            <style>
+                .avatar {
+                    vertical-align: middle;
+                    width: 100px;
+                    border-radius: 50%;
+                }
+            </style>
+            <!-- <script>
         document.addEventListener("DOMContentLoaded", function() {
 
 
@@ -223,3 +231,6 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
 
         });
     </script> -->
+        </div>
+    </div>
+</body>
