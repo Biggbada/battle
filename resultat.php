@@ -24,6 +24,9 @@ $db->query('DROP TABLE players');
 
 <body>
     <div class="container">
+        <audio id="fight-song" src="fight.mp3"></audio>
+        <audio id="hadoudken-song" src="Haduken.mp3"></audio>
+        <audio id="fatality-song" src="fatality.mp3"></audio>
         <div id="Resultats">
             <h1>Résultat</h1>
             <p>

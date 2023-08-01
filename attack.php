@@ -95,38 +95,6 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
 
 
 
-
-// if (isset($_SESSION['player1'])) {
-//     $playerOne = $_SESSION['player1'];
-//     $playerTwo = $_SESSION['player2'];
-//     if (($playerOne->health < 0) || ($playerTwo->health < 0)) {
-//         echo "end of game";
-//         header('Location: ./resultat.php');
-//     }
-// }
-// if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin'])) {
-
-//     $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante']);
-//     $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante']);
-//     $_SESSION['player1'] = $playerOne;
-//     $_SESSION['player2'] = $playerTwo;
-// }
-// if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
-//     $playerOne = $_SESSION['player1'];
-//     $playerTwo = $_SESSION['player2'];
-//     $isCured = $playerOne->cure();
-//     if ($isCured === false) {
-//         return;
-//     } else {
-//         $playerTwo->attack($playerOne);
-//         $_SESSION['player1'] = $playerOne;
-
-//         if ($playerOne->health < 0) {
-//             echo "end of game";
-//             header('Location: ./resultat.php');
-//         }
-//     }
-// }
 ?>
 
 <head>
@@ -140,6 +108,9 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
 
 <body>
     <div class="container">
+        <audio id="fight-song" src="fight.mp3"></audio>
+        <audio id="hadoudken-song" src="Haduken.mp3"></audio>
+        <audio id="fatality-song" src="fatality.mp3"></audio>
         <div id="match" class="row gx-5">
             <h2>Match</h2>
             <div class="col-6 ">
@@ -199,38 +170,38 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
                     border-radius: 50%;
                 }
             </style>
-            <!-- <script>
-        document.addEventListener("DOMContentLoaded", function() {
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
 
 
-            let submitAttaque = document.querySelector("#attaque");
-            let alreadyPlaySong = false;
-            if (submitAttaque) {
-                submitAttaque.addEventListener("click", function(event) {
-                    if (alreadyPlaySong)
-                        return true;
-                    event.preventDefault();
-                    let player = document.querySelector("#player")
-                    player.classList.add("animate__animated");
-                    player.classList.add("animate__rubberBand");
-                    submitAttaque.classList.add("animate__animated");
-                    submitAttaque.classList.add("animate__rubberBand");
-                    setTimeout(function() {
-                        submitAttaque.classList.remove("animate__rubberBand");
-                        player.classList.remove("animate__rubberBand");
-                    }, 1000);
-                    let hadouken_song = document.getElementById("hadoudken-song");
-                    hadouken_song.play();
-                    alreadyPlaySong = true;
-                    setTimeout(function() {
-                        submitAttaque.click();
-                    }, 1000);
-                })
-            }
+                    let submitAttaque = document.querySelector("#attaque");
+                    let alreadyPlaySong = false;
+                    if (submitAttaque) {
+                        submitAttaque.addEventListener("click", function(event) {
+                            if (alreadyPlaySong)
+                                return true;
+                            event.preventDefault();
+                            let player = document.querySelector("#player")
+                            player.classList.add("animate__animated");
+                            player.classList.add("animate__rubberBand");
+                            submitAttaque.classList.add("animate__animated");
+                            submitAttaque.classList.add("animate__rubberBand");
+                            setTimeout(function() {
+                                submitAttaque.classList.remove("animate__rubberBand");
+                                player.classList.remove("animate__rubberBand");
+                            }, 1000);
+                            let hadouken_song = document.getElementById("hadoudken-song");
+                            hadouken_song.play();
+                            alreadyPlaySong = true;
+                            setTimeout(function() {
+                                submitAttaque.click();
+                            }, 1000);
+                        })
+                    }
 
 
-        });
-    </script> -->
+                });
+            </script>
         </div>
     </div>
 </body>
