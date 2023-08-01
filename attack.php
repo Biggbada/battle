@@ -115,7 +115,7 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
             <h2>Match</h2>
             <div class="col-6 ">
                 <div class="position-relative float-end">
-                    <img id="player" src="https://api.dicebear.com/6.x/lorelei/svg?flip=false&seed=test" alt="Avatar" class="avatar float-end">
+                    <img id="player" src="https://api.dicebear.com/6.x/lorelei/svg?flip=false&seed=<?= $playerOne->name ?>" alt="Avatar" class="avatar float-end">
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                         <?= $playerOne->health ?>
                     </span>
@@ -128,7 +128,7 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
             </div>
             <div class="col-6" id="adversaire">
                 <div class="position-relative float-start">
-                    <img src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=test2" alt="Avatar" class="avatar">
+                    <img src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=<?= $playerTwo->name ?>" alt="Avatar" class="avatar">
                     <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
                         <?= $playerTwo->health ?>
                     </span>
