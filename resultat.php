@@ -7,8 +7,8 @@ require './classes/db.class.php';
 $db = SPDO::getInstance();
 $selectDatas = $db->query('SELECT * FROM players');
 $datas = $selectDatas->fetchAll();
-$playerOne = new Player($datas[0]['playerName'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health']);
-$playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health']);
+$playerOne = new Player($datas[0]['playerName'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health'], $datas[0]['comment']);
+$playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health'], $datas[1]['comment']);
 $db->query('DROP TABLE players');
 
 ?>
@@ -27,7 +27,7 @@ $db->query('DROP TABLE players');
         <audio id="fight-song" src="fight.mp3"></audio>
         <audio id="hadoudken-song" src="Haduken.mp3"></audio>
         <audio id="fatality-song" src="fatality.mp3"></audio>
-        <div id="Resultats">
+        <div id="Resultats" class="row center">
             <h1>Résultat</h1>
             <p>
                 <?php
@@ -42,9 +42,37 @@ $db->query('DROP TABLE players');
                 }
                 ?>
             </p>
-            <form class="d-flex justify-content-center" action="./index.php" method="post">
-                <input name="restart" type="submit" value="Nouveau combat">
-            </form>
+            <div class="col-6 ">
+                <div class="position-relative float-end">
+                    <img id="player" src="https://api.dicebear.com/6.x/lorelei/svg?flip=false&seed=<?= $playerOne->name ?>" alt="Avatar" class="avatar float-end">
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        <?= $playerOne->health ?>
+                    </span>
+                    <ul>
+                        <li>Name : <?= $playerOne->name ?></li>
+                        <li>Attaque : <?= $playerOne->power ?></li>
+                        <li>Mana : <?= $playerOne->mana ?></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-6" id="adversaire">
+                <div class="position-relative float-start">
+                    <img src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=<?= $playerTwo->name ?>" alt="Avatar" class="avatar">
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
+                        <?= $playerTwo->health ?>
+                    </span>
+                    <ul>
+                        <li>Name : <?= $playerTwo->name ?></li>
+                        <li>Attaque : <?= $playerTwo->power ?></li>
+                        <li>Mana : <?= $playerTwo->mana ?></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <form class="d-flex justify-content-center" action="./index.php" method="post">
+                    <input name="restart" type="submit" value="Nouveau combat">
+                </form>
+            </div>
         </div>
     </div>
     <script>

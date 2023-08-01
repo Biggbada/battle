@@ -54,6 +54,8 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     // dump($random);
 
     if ($playerTwo->health <= 0) {
+        SPDO::updateDB($db, $playerOne, $playerTwo);
+
         header('Location: ./resultat.php');
     }
     if (($playerTwo->health < 50) && ($random === 1)) {
@@ -63,9 +65,8 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
         }
     } else {
         $playerTwo->attack($playerOne);
-        $_SESSION['player1'] = $playerOne;
         if ($playerOne->health <= 0) {
-            echo "end of game";
+            SPDO::updateDB($db, $playerOne, $playerTwo);
             header('Location: ./resultat.php');
         }
     }
@@ -144,9 +145,9 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
                 <ul>
 
 
-                    <?php if (isset($playerOne->comment)) { ?>
+                    <?php if ($playerOne->comment != '') { ?>
                         <li><i class="fa-solid fa-khanda p-1"><?= $playerOne->comment ?></i></li><?php } ?>
-                    <?php if (isset($playerTwo->comment)) { ?>
+                    <?php if ($playerTwo->comment != '') { ?>
                         <li><i class="fa-solid fa-khanda p-1"><?= $playerTwo->comment ?></i></li><?php } ?>
                     </li>
 

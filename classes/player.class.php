@@ -7,12 +7,13 @@ class Player
     public float $health;
     public string $comment;
 
-    public function __construct(string $name, int $power = 100, int $mana = 100, int $health = 100)
+    public function __construct(string $name, int $power = 100, int $mana = 100, int $health = 100, string $comment = '')
     {
         $this->name = $name;
         $this->power = $power;
         $this->mana = $mana;
         $this->health = $health;
+        $this->comment = $comment;
     }
     public function attack(Player $player)
     {
