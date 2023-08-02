@@ -44,7 +44,7 @@ $db->query('DROP TABLE players');
             </p>
             <div class="col-6 ">
                 <div class="position-relative float-end">
-                    <img id="player" src="https://api.dicebear.com/6.x/lorelei/svg?flip=false&seed=<?= $playerOne->name ?>" alt="Avatar" class="avatar float-end">
+                    <img id="player" src="https://api.dicebear.com/6.x/avataaars/svg?accessoriesProbability=0&flip=false&seed=<?= $playerOne->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar float-end" alt="Avatar" class="avatar float-end">
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                         <?= $playerOne->health ?>
                     </span>
@@ -57,7 +57,7 @@ $db->query('DROP TABLE players');
             </div>
             <div class="col-6" id="adversaire">
                 <div class="position-relative float-start">
-                    <img src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=<?= $playerTwo->name ?>" alt="Avatar" class="avatar">
+                    <img src="https://api.dicebear.com/6.x/pixel-art/svg?flip=true&seed=<?= $playerTwo->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar">
                     <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
                         <?= $playerTwo->health ?>
                     </span>
