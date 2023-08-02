@@ -3,6 +3,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 // require './index.php';
 require './classes/player.class.php';
 require './classes/db.class.php';
+require './repository.php';
 
 // session_start();
 
@@ -13,15 +14,8 @@ $db = SPDO::getInstance();
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin']) && !isset($_POST['restart'])) {
     $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante']);
     $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante']);
+    createDb($db);
 
-
-    $db->query('CREATE TABLE `players` (
-        `playerName` VARCHAR(25) NOT NULL,
-        `power` INT NOT NULL,
-        `mana` INT NOT NULL,
-        `health` INT NOT NULL,
-        `comment` VARCHAR(150) NULL DEFAULT NULL
-    )');
     $dbInsertPlayer = $db->prepare("INSERT INTO players(playerName, power, mana, health) VALUES (:playerName, :power, :mana, :health)");
     $dbInsertPlayer->bindParam(':playerName', $_POST['player-name']);
     $dbInsertPlayer->bindParam(':power', $_POST['player-attaque']);
@@ -37,7 +31,7 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isse
 
     // dump($db);
     $selectDatas = $db->query('SELECT * FROM players');
-    $datas = $selectDatas->fetchAll();
+    $datas = $selectDatas->fetchAll(PDO::FETCH_CLASS, 'Player');
 
     // dump($datas);
 }
