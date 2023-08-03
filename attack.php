@@ -31,7 +31,7 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isse
 
     // dump($db);
     $selectDatas = $db->query('SELECT * FROM players');
-    $datas = $selectDatas->fetchAll(PDO::FETCH_CLASS, 'Player');
+    $datas = $selectDatas->fetchAll();
 
     // dump($datas);
 }
@@ -139,9 +139,9 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
                 <ul>
 
 
-                    <?php if ($playerOne->comment != '') { ?>
+                    <?php if (isset($playerOne->comment)) { ?>
                         <li><i class="fa-solid fa-khanda p-1"><?= $playerOne->comment ?></i></li><?php } ?>
-                    <?php if ($playerTwo->comment != '') { ?>
+                    <?php if (isset($playerTwo->comment)) { ?>
                         <li><i class="fa-solid fa-khanda p-1"><?= $playerTwo->comment ?></i></li><?php } ?>
                     </li>
 

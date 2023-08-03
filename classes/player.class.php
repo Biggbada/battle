@@ -5,7 +5,7 @@ class Player
     public float $power;
     public float $mana;
     public float $health;
-    public string $comment = '.';
+    public string $comment;
 
     public function __construct(string $name, int $power = 100, int $mana = 100, int $health = 100)
     {
