@@ -7,6 +7,6 @@ function createDb($db)
         `power` INT NOT NULL,
         `mana` INT NOT NULL,
         `health` INT NOT NULL,
-        `comment` VARCHAR(150) NULL DEFAULT NULL
+        `comment` VARCHAR(150) NOT NULL DEFAULT ' . ',
     )');
 }
