@@ -149,8 +149,32 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
     $playerTwo = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']);
 
     $isCured = $playerOne->cure();
+    $_SESSION['p1_mana'] = $playerOne->mana;
+    $_SESSION['p1_health'] = $playerOne->health;
+
     if ($isCured === false) {
-        return;
+        $playerOne->attack($playerTwo);
+        if ($playerTwo->health <= 0) {
+
+            header('Location: ./resultat.php');
+        }
+        if (($playerTwo->health < 50) && ($random === 1)) {
+            $iscured = $playerTwo->cure();
+            if ($iscured === false) {
+                $playerTwo->attack($playerOne);
+                $_SESSION['p1_mana'] = $playerOne->mana;
+                $_SESSION['p1_health'] = $playerOne->health;
+            }
+        } else {
+            $playerTwo->attack($playerOne);
+            $_SESSION['p1_mana'] = $playerOne->mana;
+            $_SESSION['p1_health'] = $playerOne->health;
+            if ($playerOne->health <= 0) {
+                header('Location: ./resultat.php');
+            }
+        }
+
+        $playerOne->attack($playerTwo);
     } else {
         $playerTwo->attack($playerOne);
         $_SESSION['player1'] = $playerOne;
@@ -163,7 +187,8 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
     // SPDO::updateDB($db, $playerOne, $playerTwo);
 }
 
-
+dump("player one", $playerOne);
+dump("player two", $playerTwo);
 
 ?>
 

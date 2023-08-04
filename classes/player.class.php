@@ -7,7 +7,7 @@ class Player
     public float $health;
     public string $comment;
 
-    public function __construct(string $name, int $power = 100, int $mana = 100, int $health = 100)
+    public function __construct(string $name, float $power = 100, float $mana = 100, float $health = 100)
     {
         $this->name = $name;
         $this->power = $power;
@@ -31,17 +31,17 @@ class Player
     public function cure()
     {
         if ($this->mana > 0) {
-
-            $this->health += (($this->mana / 20) + 10);
+            $healthGain = ($this->mana / 20) + 10;
+            $this->health += $healthGain;
+            $usedMana = ($this->mana * 0.75) + 1;
+            $this->mana -= $usedMana;
             if ($this->health > 100) {
                 $this->health = 100;
             }
-            $this->mana /= 4;
-            $this->mana -= 1;
             if ($this->mana < 0) {
                 $this->mana = 0;
             }
-            $this->comment = "$this->name s'est soigne";
+            $this->comment = "$this->name a recup $healthGain points de vie contre $usedMana points de mana";
             return $this;
         } else {
             $this->comment = "$this->name n'a plus assez de mana pour se soigner";
