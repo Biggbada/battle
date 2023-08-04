@@ -1,11 +1,13 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 require './classes/player.class.php';
+require './classes/fight.class.php';
 require './classes/db.class.php';
 
-
-
-
+$db = SPDO::getInstance();
+$selectDatas = $db->query('SELECT * FROM players');
+$datas = $selectDatas->fetchAll();
+$players = SPDO::getPlayers($db);
 ?>
 
 
@@ -17,7 +19,7 @@ require './classes/db.class.php';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <script src="./index.js" defer></script>
+    <!-- <script src="./index.js" defer></script> -->
 
 </head>
 
@@ -31,6 +33,18 @@ require './classes/db.class.php';
             <form id='formFight' action="attack.php" method="post">
                 <div>
                     Joueur <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <select name="player-id" id="player1selector">
+                                <option value="">Select player</option>
+
+                                <?php foreach ($datas as $key => $player) { ?>
+                                    <option value=<?= $player['id'] ?>><?= $player['name'] ?></option>
+                                <?php } ?>
+
+                            </select>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-6">
                             <label class="form-label">Name</label>
@@ -53,6 +67,18 @@ require './classes/db.class.php';
                 <hr>
                 <div>
                     Adversaire <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <select name="adversaire-id" id="player2selector">
+                                <option value="">Select player</option>
+
+                                <?php foreach ($datas as $key => $player) { ?>
+                                    <option value=<?= $player['id'] ?>><?= $player['name'] ?></option>
+                                <?php } ?>
+
+                            </select>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-6">
                             <label class="form-label">Name</label>

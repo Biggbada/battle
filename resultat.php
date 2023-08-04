@@ -9,7 +9,7 @@ $selectDatas = $db->query('SELECT * FROM players');
 $datas = $selectDatas->fetchAll();
 $playerOne = new Player($datas[0]['playerName'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health'], $datas[0]['comment']);
 $playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health'], $datas[1]['comment']);
-$db->query('DROP TABLE players');
+// $db->query('DROP TABLE players');
 
 ?>
 

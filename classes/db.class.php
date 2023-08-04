@@ -36,7 +36,7 @@ class SPDO
      *
      * @var string
      */
-    const DEFAULT_SQL_DTB = 'battle';
+    const DEFAULT_SQL_DTB = 'battlev2';
 
     /**
      * Crée et retourne l'objet SPDO
@@ -67,5 +67,25 @@ class SPDO
         $dbUpdateAdversaire->bindParam(':health', $playerTwo->health);
         $dbUpdateAdversaire->bindParam(':comment', $playerTwo->comment);
         $dbUpdateAdversaire->execute();
+    }
+
+    public static function getPlayers($db)
+    {
+        $db = SPDO::getInstance();
+        $selectDatas = $db->query('SELECT * FROM players');
+        $datas = $selectDatas->fetchAll();
+        foreach ($datas as $key => $player) {
+            return $player;
+        }
+    }
+    public static function findPlayer($dbPLayers, $playerName)
+    {
+        foreach ($dbPLayers as $player) {
+            dump($player);
+            if ($player['name'] === $playerName) {
+                echo ($player['name'] . ' ' . $player['id']);
+                return $player['id'];
+            }
+        }
     }
 }

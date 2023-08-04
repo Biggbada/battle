@@ -2,9 +2,10 @@
 require_once __DIR__ . '/vendor/autoload.php';
 // require './index.php';
 require './classes/player.class.php';
+require './classes/fight.class.php';
 require './classes/db.class.php';
 require './repository.php';
-
+// dump($_POST);
 // session_start();
 
 
@@ -12,40 +13,95 @@ $db = SPDO::getInstance();
 
 //cas d'une entrée depuis le formulaire d'inscription des  joueurs
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin']) && !isset($_POST['restart'])) {
-    $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante']);
-    $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante']);
-    createDb($db);
+    // createDb($db);
 
-    $dbInsertPlayer = $db->prepare("INSERT INTO players(playerName, power, mana, health) VALUES (:playerName, :power, :mana, :health)");
-    $dbInsertPlayer->bindParam(':playerName', $_POST['player-name']);
-    $dbInsertPlayer->bindParam(':power', $_POST['player-attaque']);
-    $dbInsertPlayer->bindParam(':mana', $_POST['player-mana']);
-    $dbInsertPlayer->bindParam(':health', $_POST['player-sante']);
-    $dbInsertPlayer->execute();
-    $dbInsertAdversaire = $db->prepare("INSERT INTO players(playerName, power, mana, health) VALUES (:playerName, :power, :mana, :health)");
-    $dbInsertAdversaire->bindParam(':playerName', $_POST['adversaire-name']);
-    $dbInsertAdversaire->bindParam(':power', $_POST['adversaire-attaque']);
-    $dbInsertAdversaire->bindParam(':mana', $_POST['adversaire-mana']);
-    $dbInsertAdversaire->bindParam(':health', $_POST['adversaire-sante']);
-    $dbInsertAdversaire->execute();
+    //player 1
 
-    // dump($db);
-    $selectDatas = $db->query('SELECT * FROM players');
-    $datas = $selectDatas->fetchAll();
+    if (is_numeric($_POST["player-id"])) {
+        // jai selectionner un player qui existe en base, j'ai l'id, faut que j'aille chercher le player en bdd
+        $result = $db->prepare("SELECT * from players WHERE id=:id");
+        $result->execute([':id' => $_POST['player-id']]);
+        $selectedPlayer = $result->fetchAll();
+        $playerOne = new Player($selectedPlayer[0]['name'], $selectedPlayer[0]['initial_mana'], $selectedPlayer[0]['initial_health'], $selectedPlayer[0]['initial_pow']);
+        // dump($playerOne);
 
-    // dump($datas);
+    } else {
+        //je verifie que le nom est pas deja existant en base
+        $requete = $db->prepare("SELECT `name` FROM players WHERE name=:name");
+        $requete->execute([':name' => $_POST['player-name']]);
+        $searchedPlayer = $requete->fetch();
+        $exist = is_array($searchedPlayer);
+
+        if ($exist) {
+            // je retourne sur la page je previent le mec ca existe deja
+            header('Location: ./index.php?error=exist');
+            echo ('le player ' . $_POST['player-name'] . " existe déja");
+        } else {
+            // j'ai des info sur toutes les data du player et faut que je le créer en base
+            $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante'],);
+            $insert = $db->prepare('INSERT INTO players(`name`, initial_mana, initial_health, initial_pow) VALUES(:playerName, :mana, :health, :power)');
+            $insert->bindParam(':playerName', $playerOne->name);
+            $insert->bindParam(':mana', $playerOne->mana);
+            $insert->bindParam(':health', $playerOne->health);
+            $insert->bindParam(':power', $playerOne->power);
+            $insert->execute();
+        }
+    }
+
+
+    //player 2
+
+    if (is_numeric($_POST["adversaire-id"])) {
+        // jai selectionner un player qui existe en base, j'ai l'id, faut que j'aille chercher le player en bdd
+        $result = $db->query("SELECT * from players WHERE id=" . $_POST["adversaire-id"]);
+        $selectedPlayer = $result->fetchAll();
+        $playerTwo = new Player($selectedPlayer[0]['name'], $selectedPlayer[0]['initial_mana'], $selectedPlayer[0]['initial_health'], $selectedPlayer[0]['initial_pow']);
+    } else {
+        //je verifie que le nom est pas deja existant en base
+        $requete = $db->prepare("SELECT `name` FROM players WHERE name=:name");
+        $requete->execute([':name' => $_POST['adversaire-name']]);
+        $searchedPlayer = $requete->fetch();
+        $exist = is_array($searchedPlayer);
+        // $exist = false;
+
+        if ($exist) {
+            // je retourne sur la page je previent le mec ca existe deja
+            header('Location: ./index.php');
+            echo ('le player ' . $_POST['player-name'] . " existe déja");
+        } else {
+            // j'ai des info sur toutes les data du player et faut que je le créer en base
+            $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante'],);
+            $insert = $db->prepare('INSERT INTO players(`name`, initial_mana, initial_health, initial_pow) VALUES(:playerName, :mana, :health, :power)');
+            $insert->bindParam(':playerName', $playerTwo->name);
+            $insert->bindParam(':mana', $playerTwo->mana);
+            $insert->bindParam(':health', $playerTwo->health);
+            $insert->bindParam(':power', $playerTwo->power);
+            $insert->execute();
+        }
+    }
+    // $createFight = $db->prepare('INSERT INTO fights (id_p2) VALUES (:id_pl2)');
+    // $createFight->execute([':id_pl2' => $selectedPlayer[0]['id']]);
+
+    // créer un fight avec player et adversaire
+
+    $findFighters = $db->prepare('SELECT id FROM players WHERE name=:name1 OR name=:name2');
+    $findFighters->execute([':name1' => $playerOne->name, ':name2' => $playerTwo->name]);
+    $fighters = $findFighters->fetchAll();
+    $createFight = $db->prepare('INSERT INTO fights (id_p1, id_p2) VALUES (:id_pl1, :id_pl2)');
+    // $createFight->execute([':id_pl1' => $fighters[0]['id'], ':id_pl2' => $fighters[1]['id']]);
 }
 
 //cas d'une arrive depuis un clic sur attaque
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     $selectDatas = $db->query('SELECT * FROM players');
     $datas = $selectDatas->fetchAll();
-    $playerOne = new Player($datas[0]['playerName'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health']);
-    $playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health']);
+    $playerOne = new Player($datas[0]['name'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health']);
+    $playerTwo = new Player($datas[1]['name'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health']);
 
     $playerOne->attack($playerTwo);
     $random = rand(0, 1);
     // dump($random);
+    // todo 
 
     if ($playerTwo->health <= 0) {
         SPDO::updateDB($db, $playerOne, $playerTwo);
