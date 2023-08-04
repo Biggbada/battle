@@ -5,14 +5,12 @@ require './classes/player.class.php';
 require './classes/fight.class.php';
 require './classes/db.class.php';
 require './repository.php';
-// dump($_POST);
-// session_start();
-
+session_start();
 
 $db = SPDO::getInstance();
 
 //cas d'une entrée depuis le formulaire d'inscription des  joueurs
-if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin']) && !isset($_POST['restart'])) {
+if (isset($_POST['fight'])) {
     // createDb($db);
 
     //player 1
@@ -23,8 +21,6 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isse
         $result->execute([':id' => $_POST['player-id']]);
         $selectedPlayer = $result->fetchAll();
         $playerOne = new Player($selectedPlayer[0]['name'], $selectedPlayer[0]['initial_mana'], $selectedPlayer[0]['initial_health'], $selectedPlayer[0]['initial_pow']);
-        // dump($playerOne);
-
     } else {
         //je verifie que le nom est pas deja existant en base
         $requete = $db->prepare("SELECT `name` FROM players WHERE name=:name");
@@ -84,27 +80,47 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isse
 
     // créer un fight avec player et adversaire
 
-    $findFighters = $db->prepare('SELECT id FROM players WHERE name=:name1 OR name=:name2');
+    $findFighters = $db->prepare('SELECT * FROM players WHERE name=:name1 OR name=:name2');
     $findFighters->execute([':name1' => $playerOne->name, ':name2' => $playerTwo->name]);
     $fighters = $findFighters->fetchAll();
     $createFight = $db->prepare('INSERT INTO fights (id_p1, id_p2) VALUES (:id_pl1, :id_pl2)');
-    // $createFight->execute([':id_pl1' => $fighters[0]['id'], ':id_pl2' => $fighters[1]['id']]);
+    $createFight->execute([':id_pl1' => $fighters[0]['id'], ':id_pl2' => $fighters[1]['id']]);
+    $fightID = intval($db->lastInsertId());
+
+    $_SESSION['p1_id'] = $fighters[0]['id'];
+    $_SESSION['p1_name'] = $fighters[0]['name'];
+    $_SESSION['p1_pow'] = $fighters[0]['initial_pow'];
+    $_SESSION['p1_mana'] = $fighters[0]['initial_mana'];
+    $_SESSION['p1_health'] = $fighters[0]['initial_health'];
+    $_SESSION['p2_id'] = $fighters[1]['id'];
+    $_SESSION['p2_name'] = $fighters[1]['name'];
+    $_SESSION['p2_pow'] = $fighters[1]['initial_pow'];
+    $_SESSION['p2_mana'] = $fighters[1]['initial_mana'];
+    $_SESSION['p2_health'] = $fighters[1]['initial_health'];
+    $_SESSION['fight_id'] = $fightID;
 }
 
 //cas d'une arrive depuis un clic sur attaque
-if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
-    $selectDatas = $db->query('SELECT * FROM players');
-    $datas = $selectDatas->fetchAll();
-    $playerOne = new Player($datas[0]['name'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health']);
-    $playerTwo = new Player($datas[1]['name'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health']);
 
+
+
+
+if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
+    // $selectDatas = $db->query('SELECT * FROM players');
+    // $datas = $selectDatas->fetchAll();
+    $playerOne = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
+    $playerTwo = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']);
     $playerOne->attack($playerTwo);
     $random = rand(0, 1);
-    // dump($random);
+    $_SESSION['p2_mana'] = $playerTwo->mana;
+    $_SESSION['p2_health'] = $playerTwo->health;
     // todo 
 
     if ($playerTwo->health <= 0) {
-        SPDO::updateDB($db, $playerOne, $playerTwo);
+        $insertWinner = $db->prepare("UPDATE fights SET id_victory=:id_victory WHERE id=:id");
+        $insertWinner->execute([":id_victory" => $_SESSION["p1_id"], ":id" => intval($_SESSION["fight_id"])]);
+
+        // SPDO::updateDB($db, $playerOne, $playerTwo);
 
         header('Location: ./resultat.php');
     }
@@ -112,15 +128,23 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
         $iscured = $playerTwo->cure();
         if ($iscured === false) {
             $playerTwo->attack($playerOne);
+            $_SESSION['p1_mana'] = $playerOne->mana;
+            $_SESSION['p1_health'] = $playerOne->health;
         }
     } else {
         $playerTwo->attack($playerOne);
+        $_SESSION['p1_mana'] = $playerOne->mana;
+        $_SESSION['p1_health'] = $playerOne->health;
         if ($playerOne->health <= 0) {
-            SPDO::updateDB($db, $playerOne, $playerTwo);
+            $insertWinner = $db->prepare("UPDATE fights SET id_victory=:id_victory WHERE id=:id");
+
+            $insertWinner->execute([":winner_id" => $_SESSION["p2_id"], ":id" => intval($_SESSION["fight_id"])]);
+
+            // SPDO::updateDB($db, $playerOne, $playerTwo);
             header('Location: ./resultat.php');
         }
     }
-    SPDO::updateDB($db, $playerOne, $playerTwo);
+    // SPDO::updateDB($db, $playerOne, $playerTwo);
 }
 
 //cas d'une arrivée depuis un clic sur se soigner
