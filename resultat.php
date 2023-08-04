@@ -2,15 +2,31 @@
 require_once __DIR__ . '/vendor/autoload.php';
 // require './index.php';
 require './classes/player.class.php';
+require './classes/fight.class.php';
 require './classes/db.class.php';
+require './repository.php';
+session_start();
 
 $db = SPDO::getInstance();
 $selectDatas = $db->query('SELECT * FROM players');
 $datas = $selectDatas->fetchAll();
-$playerOne = new Player($datas[0]['playerName'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health'], $datas[0]['comment']);
-$playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health'], $datas[1]['comment']);
-// $db->query('DROP TABLE players');
-
+$playerOne = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
+$playerTwo = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']); // $db->query('DROP TABLE players');
+if (($playerOne->health) > ($playerTwo->health)) {
+    $playerOne->comment = $playerOne->name . " est le vainqueur avec " . $playerOne->health . " points de vie et " . $playerOne->mana . " points de mana";
+    $playerTwo->comment = $playerTwo->name . " a perdu le combat...";
+}
+if (($playerOne->health) < ($playerTwo->health)) {
+    $playerOne->comment = $playerOne->name . " a perdu le combat...";
+    $playerTwo->comment = $playerTwo->name . " est le vainqueur avec " . $playerTwo->health . " points de vie et " . $playerTwo->mana . " points de mana";
+}
+if (($playerOne->health) === ($playerTwo->health)) {
+    $playerOne->comment = "Match nul !";
+    $playerTwo->comment = "Match nul !";
+}
+$_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / ");
+$insertWinner = $db->prepare("UPDATE fights SET id_victory=:id_victory, battle_log=:battle_log WHERE id=:id");
+$insertWinner->execute([":id_victory" => $_SESSION["p1_id"], ":battle_log" => $_SESSION['log'], ":id" => intval($_SESSION["fight_id"])]);
 ?>
 
 <head>
@@ -31,15 +47,9 @@ $playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['
             <h1>Résultat</h1>
             <p>
                 <?php
-                if (($playerOne->health) > ($playerTwo->health)) {
-                    echo "$playerOne->name est le vainqueur";
-                }
-                if (($playerOne->health) < ($playerTwo->health)) {
-                    echo "$playerTwo->name est le vainqueur";
-                }
-                if (($playerOne->health) === ($playerTwo->health)) {
-                    echo "Match nul !!!";
-                }
+
+
+
                 ?>
             </p>
             <div class="col-6 ">
@@ -73,6 +83,13 @@ $playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['
                     <input name="restart" type="submit" value="Nouveau combat">
                 </form>
             </div>
+        </div>
+        <div id="combats">
+            <h2>Combat</h2>
+            <ul>
+                <li><i class="fa-solid fa-khanda p-1"><?= $playerOne->comment ?></i></li>
+                <li><i class="fa-solid fa-khanda p-1"><?= $playerTwo->comment ?></i></li>
+            </ul>
         </div>
     </div>
     <script>

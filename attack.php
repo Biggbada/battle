@@ -117,10 +117,6 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     // todo 
 
     if ($playerTwo->health <= 0) {
-        $insertWinner = $db->prepare("UPDATE fights SET id_victory=:id_victory WHERE id=:id");
-        $insertWinner->execute([":id_victory" => $_SESSION["p1_id"], ":id" => intval($_SESSION["fight_id"])]);
-
-        // SPDO::updateDB($db, $playerOne, $playerTwo);
 
         header('Location: ./resultat.php');
     }
@@ -136,23 +132,22 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
         $_SESSION['p1_mana'] = $playerOne->mana;
         $_SESSION['p1_health'] = $playerOne->health;
         if ($playerOne->health <= 0) {
-            $insertWinner = $db->prepare("UPDATE fights SET id_victory=:id_victory WHERE id=:id");
-
-            $insertWinner->execute([":winner_id" => $_SESSION["p2_id"], ":id" => intval($_SESSION["fight_id"])]);
-
-            // SPDO::updateDB($db, $playerOne, $playerTwo);
             header('Location: ./resultat.php');
         }
     }
     // SPDO::updateDB($db, $playerOne, $playerTwo);
+    if (isset($_SESSION['log'])) {
+        $_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / ");
+    } else {
+        $_SESSION['log'] = ($playerOne->comment . " / " . $playerTwo->comment . " / ");
+    }
 }
 
 //cas d'une arrivée depuis un clic sur se soigner
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
-    $selectDatas = $db->query('SELECT * FROM players');
-    $datas = $selectDatas->fetchAll();
-    $playerOne = new Player($datas[0]['playerName'], $datas[0]['power'], $datas[0]['mana'], $datas[0]['health']);
-    $playerTwo = new Player($datas[1]['playerName'], $datas[1]['power'], $datas[1]['mana'], $datas[1]['health']);
+    $playerOne = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
+    $playerTwo = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']);
+
     $isCured = $playerOne->cure();
     if ($isCured === false) {
         return;
@@ -165,7 +160,7 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
             header('Location: ./resultat.php');
         }
     }
-    SPDO::updateDB($db, $playerOne, $playerTwo);
+    // SPDO::updateDB($db, $playerOne, $playerTwo);
 }
 
 
