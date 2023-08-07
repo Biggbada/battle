@@ -88,4 +88,25 @@ class SPDO
             }
         }
     }
+    public static function setPlayer($db, $name, $mana, $health, $power)
+    {
+        $insert = $db->prepare('INSERT INTO players(`name`, initial_mana, initial_health, initial_pow) VALUES(:playerName, :mana, :health, :power)');
+        $insert->bindParam(':playerName', $name);
+        $insert->bindParam(':mana', $mana);
+        $insert->bindParam(':health', $health);
+        $insert->bindParam(':power', $power);
+        $insert->execute();
+    }
+    public static function getFighters($db, $playerOneName, $playerTwoName)
+    {
+        $findFighters = $db->prepare('SELECT * FROM players WHERE name=:name1 OR name=:name2');
+        $findFighters->execute([':name1' => $playerOneName, ':name2' => $playerTwoName]);
+        $fighters = $findFighters->fetchAll();
+        return $fighters;
+    }
+    public static function setWinner($db, $winnerID, $battleLog, $fightID)
+    {
+        $insertWinner = $db->prepare("UPDATE fights SET id_victory=:id_victory, battle_log=:battle_log WHERE id=:id");
+        $insertWinner->execute([":id_victory" => $winnerID, ":battle_log" => $battleLog, ":id" => intval($fightID)]);
+    }
 }

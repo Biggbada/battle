@@ -8,6 +8,7 @@ require './repository.php';
 session_start();
 
 $db = SPDO::getInstance();
+dump($_SESSION['log']);
 $selectDatas = $db->query('SELECT * FROM players');
 $datas = $selectDatas->fetchAll();
 $playerOne = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
@@ -15,18 +16,22 @@ $playerTwo = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2
 if (($playerOne->health) > ($playerTwo->health)) {
     $playerOne->comment = $playerOne->name . " est le vainqueur avec " . $playerOne->health . " points de vie et " . $playerOne->mana . " points de mana";
     $playerTwo->comment = $playerTwo->name . " a perdu le combat...";
+    $_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / ");
+    SPDO::setWinner($db, $_SESSION["p1_id"], $_SESSION['log'], $_SESSION['fight_id']);
 }
 if (($playerOne->health) < ($playerTwo->health)) {
     $playerOne->comment = $playerOne->name . " a perdu le combat...";
     $playerTwo->comment = $playerTwo->name . " est le vainqueur avec " . $playerTwo->health . " points de vie et " . $playerTwo->mana . " points de mana";
+    $_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / ");
+    SPDO::setWinner($db, $_SESSION["p2_id"], $_SESSION['log'], $_SESSION['fight_id']);
 }
-if (($playerOne->health) === ($playerTwo->health)) {
-    $playerOne->comment = "Match nul !";
-    $playerTwo->comment = "Match nul !";
-}
-$_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / ");
-$insertWinner = $db->prepare("UPDATE fights SET id_victory=:id_victory, battle_log=:battle_log WHERE id=:id");
-$insertWinner->execute([":id_victory" => $_SESSION["p1_id"], ":battle_log" => $_SESSION['log'], ":id" => intval($_SESSION["fight_id"])]);
+session_destroy();
+// // if (($playerOne->health) === ($playerTwo->health)) {
+// //     $playerOne->comment = "Match nul !";
+// //     $playerTwo->comment = "Match nul !";
+// //     SPDO::setWinner($db, "0", $_SESSION['log'], $_SESSION['fight_id']);
+// // }
+// $_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / "); 
 ?>
 
 <head>

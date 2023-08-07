@@ -8,12 +8,28 @@ player1Selector = document.querySelector("#player1selector");
 player2Selector = document.querySelector("#player2selector");
 player1SelectorOptions = document.querySelector("#player1selector").options;
 player2SelectorOptions = document.querySelector("#player2selector").options;
-console.log(player1SelectorOptions.value);
+player1Name = document.querySelector('#player-name');
+player1Attaque = document.querySelector('#player-attaque');
+player1Mana = document.querySelector('#player-mana');
+player1Sante = document.querySelector('#player-sante');
+adversaireName = document.querySelector('#adversaire-name');
+adversaireAttaque = document.querySelector('#adversaire-attaque');
+adversaireMana = document.querySelector('#adversaire-mana');
+adversaireSante = document.querySelector('#adversaire-sante');
+console.log(adversaireName);
 
 
 function hideOptions (selector1, selector2) {  
 selector1.addEventListener("blur", (event) => {
   if (selector1.value != "") {
+    player1Name.disabled = true;
+    player1Name.required = false;
+    player1Attaque.disabled = true;
+    player1Attaque.required = false;
+    player1Mana.disabled = true;
+    player1Mana.required = false;
+    player1Sante.disabled = true;
+    player1Sante.required = false;
     console.log("value selected");
     removedValue = selector1.value;
     for (let i = 0; i < selector2.length; i++) {
@@ -24,10 +40,30 @@ selector1.addEventListener("blur", (event) => {
         selector2[i].disabled = false;
       }
     }
+  } else {
+    player1Name.disabled = false;
+    player1Name.required = true;
+    player1Attaque.disabled = false;
+    player1Attaque.required = true;
+    player1Mana.disabled = false;
+    player1Mana.required = true;
+    player1Sante.required = true;
+    for (let i = 0; i < selector2.length; i++) {
+      
+        selector2[i].disabled = false;
+      }
   }
 });
 selector2.addEventListener("blur", (event) => {
   if (selector2.value != "") {
+     adversaireName.disabled = true;
+     adversaireName.required = false;
+    adversaireAttaque.disabled = true;
+    adversaireAttaque.required = false;
+    adversaireMana.disabled = true;
+    adversaireMana.required = false;
+    adversaireSante.disabled = true;
+    adversaireSante.required = false;
     console.log("value selected");
     removedValue = selector2.value;
     for (let i = 0; i < selector1.length; i++) {
@@ -38,6 +74,19 @@ selector2.addEventListener("blur", (event) => {
         selector1[i].disabled = false;
       }
     }
+  } else {
+     adversaireName.disabled = false;
+     adversaireName.required = true;
+    adversaireAttaque.disabled = false;
+    adversaireAttaque.required = true;
+    adversaireMana.disabled = false;
+    adversaireMana.required = true;
+    adversaireSante.disabled = false;
+    adversaireSante.required = true;
+    for (let i = 0; i < selector1.length; i++) {
+      
+        selector1[i].disabled = false;
+      }
   }
 })
 };
@@ -62,10 +111,10 @@ hideOptions(player1Selector, player2Selector)
 // });
 
 indexFormSubmit.addEventListener("submit", (event) => {
-  event.preventDefault();
   let errorCounter = 0;
   for (let i = 0; i < indexFormInputs.length; i++) {
-    if (indexFormInputs[i].value === "") {
+    if (indexFormInputs[i].value === "" && indexFormInputs[i].required === true) {
+      event.preventDefault();
       console.log("vide");
       indexFormInputs[i].classList.add("is-invalid");
       errorCounter++;

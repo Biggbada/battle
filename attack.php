@@ -2,6 +2,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 // require './index.php';
 require './classes/player.class.php';
+require './functions.php';
 require './classes/fight.class.php';
 require './classes/db.class.php';
 require './repository.php';
@@ -11,6 +12,7 @@ $db = SPDO::getInstance();
 
 //cas d'une entrée depuis le formulaire d'inscription des  joueurs
 if (isset($_POST['fight'])) {
+    echo ('first step');
     // createDb($db);
 
     //player 1
@@ -34,13 +36,9 @@ if (isset($_POST['fight'])) {
             echo ('le player ' . $_POST['player-name'] . " existe déja");
         } else {
             // j'ai des info sur toutes les data du player et faut que je le créer en base
+
             $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante'],);
-            $insert = $db->prepare('INSERT INTO players(`name`, initial_mana, initial_health, initial_pow) VALUES(:playerName, :mana, :health, :power)');
-            $insert->bindParam(':playerName', $playerOne->name);
-            $insert->bindParam(':mana', $playerOne->mana);
-            $insert->bindParam(':health', $playerOne->health);
-            $insert->bindParam(':power', $playerOne->power);
-            $insert->execute();
+            SPDO::setPlayer($db, $playerOne->name, $playerOne->mana, $playerOne->health, $playerOne->power);
         }
     }
 
@@ -67,12 +65,7 @@ if (isset($_POST['fight'])) {
         } else {
             // j'ai des info sur toutes les data du player et faut que je le créer en base
             $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante'],);
-            $insert = $db->prepare('INSERT INTO players(`name`, initial_mana, initial_health, initial_pow) VALUES(:playerName, :mana, :health, :power)');
-            $insert->bindParam(':playerName', $playerTwo->name);
-            $insert->bindParam(':mana', $playerTwo->mana);
-            $insert->bindParam(':health', $playerTwo->health);
-            $insert->bindParam(':power', $playerTwo->power);
-            $insert->execute();
+            SPDO::setPlayer($db, $playerTwo->name, $playerTwo->mana, $playerTwo->health, $playerTwo->power);
         }
     }
     // $createFight = $db->prepare('INSERT INTO fights (id_p2) VALUES (:id_pl2)');
@@ -80,24 +73,12 @@ if (isset($_POST['fight'])) {
 
     // créer un fight avec player et adversaire
 
-    $findFighters = $db->prepare('SELECT * FROM players WHERE name=:name1 OR name=:name2');
-    $findFighters->execute([':name1' => $playerOne->name, ':name2' => $playerTwo->name]);
-    $fighters = $findFighters->fetchAll();
+    $fighters = SPDO::getFighters($db, $playerOne->name, $playerTwo->name);
+
     $createFight = $db->prepare('INSERT INTO fights (id_p1, id_p2) VALUES (:id_pl1, :id_pl2)');
     $createFight->execute([':id_pl1' => $fighters[0]['id'], ':id_pl2' => $fighters[1]['id']]);
     $fightID = intval($db->lastInsertId());
-
-    $_SESSION['p1_id'] = $fighters[0]['id'];
-    $_SESSION['p1_name'] = $fighters[0]['name'];
-    $_SESSION['p1_pow'] = $fighters[0]['initial_pow'];
-    $_SESSION['p1_mana'] = $fighters[0]['initial_mana'];
-    $_SESSION['p1_health'] = $fighters[0]['initial_health'];
-    $_SESSION['p2_id'] = $fighters[1]['id'];
-    $_SESSION['p2_name'] = $fighters[1]['name'];
-    $_SESSION['p2_pow'] = $fighters[1]['initial_pow'];
-    $_SESSION['p2_mana'] = $fighters[1]['initial_mana'];
-    $_SESSION['p2_health'] = $fighters[1]['initial_health'];
-    $_SESSION['fight_id'] = $fightID;
+    setSession($fighters, $fightID);
 }
 
 //cas d'une arrive depuis un clic sur attaque
@@ -106,6 +87,8 @@ if (isset($_POST['fight'])) {
 
 
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
+
+    // dump($_SESSION['log']);
     // $selectDatas = $db->query('SELECT * FROM players');
     // $datas = $selectDatas->fetchAll();
     $playerOne = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
@@ -114,8 +97,6 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     $random = rand(0, 1);
     $_SESSION['p2_mana'] = $playerTwo->mana;
     $_SESSION['p2_health'] = $playerTwo->health;
-    // todo 
-
     if ($playerTwo->health <= 0) {
 
         header('Location: ./resultat.php');
@@ -187,8 +168,6 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
     // SPDO::updateDB($db, $playerOne, $playerTwo);
 }
 
-dump("player one", $playerOne);
-dump("player two", $playerTwo);
 
 ?>
 

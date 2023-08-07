@@ -48,19 +48,19 @@ $players = SPDO::getPlayers($db);
                     <div class="row">
                         <div class="col-6">
                             <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="player-name">
+                            <input type="text" class="form-control" required id="player-name" name="player-name">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Attaque</label>
-                            <input type="number" class="form-control" value="100" name="player-attaque">
+                            <input type="number" class="form-control" value="100" required id="player-attaque" name="player-attaque">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Mana</label>
-                            <input type="number" class="form-control" value="100" name="player-mana">
+                            <input type="number" class="form-control" value="100" required id="player-mana" name="player-mana">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Santé</label>
-                            <input type="number" class="form-control" value="100" name="player-sante">
+                            <input type="number" class="form-control" value="100" required id="player-sante" name="player-sante">
                         </div>
                     </div>
                 </div>
@@ -82,19 +82,19 @@ $players = SPDO::getPlayers($db);
                     <div class="row">
                         <div class="col-6">
                             <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="adversaire-name">
+                            <input type="text" class="form-control" required id="adversaire-name" name="adversaire-name">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Attaque</label>
-                            <input type="number" class="form-control" value="100" name="adversaire-attaque">
+                            <input type="number" class="form-control" value="100" required id="adversaire-attaque" name="adversaire-attaque">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Mana</label>
-                            <input type="number" class="form-control" value="100" name="adversaire-mana">
+                            <input type="number" class="form-control" value="100" required id="adversaire-mana" name="adversaire-mana">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Santé</label>
-                            <input type="number" class="form-control" value="100" name="adversaire-sante">
+                            <input type="number" class="form-control" value="100" required id="adversaire-sante" name="adversaire-sante">
                         </div>
                     </div>
                 </div>
