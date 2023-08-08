@@ -25,7 +25,14 @@ session_start();
 $db = SPDO::getInstance();
 
 
-$dbquery = $db->prepare('SELECT id_victory, COUNT(id_victory) AS idv FROM fights GROUP BY id_victory ORDER BY COUNT(*) DESC');
+$dbquery = $db->prepare('
+SELECT name, COUNT(id_victory) as victory
+FROM fights
+JOIN players 
+ON players.id=fights.id_victory
+GROUP BY id_victory
+ORDER BY COUNT(*) DESC
+');
 // dump($bestPlayers);
 $dbquery->execute();
 // dump($bestPlayers);
@@ -35,9 +42,17 @@ $dbquery->execute();
 $bestPlayers = $dbquery->fetchAll();
 // $bestPlayers->fetch();
 dump($bestPlayers);
-foreach ($bestPlayers as  $bestPlayer) {
-    echo ($bestPlayer['id_victory']);
+$winnersList = [];
+$winnersList = [
+    'name' => [],
+    'victories' => [],
+];
+foreach ($bestPlayers as $value) {
+
+    $winnersList['name'][] = $value['name'];
+    array_push($winnersList['victories'], $value['victory']); //autre methode
 }
+dump($winnersList);
 ?>
 
 <head>
@@ -52,32 +67,32 @@ foreach ($bestPlayers as  $bestPlayer) {
 
 <body>
     <div>
-        <canvas id="myChart">
-
-
-            <script>
-                const ctx = document.getElementById('myChart');
-
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: <?php  ?>,
-                        datasets: [{
-                            label: '# of Votes',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-            </script>
-
-        </canvas>
+        <canvas id="myChart"></canvas>
     </div>
 
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const ctx = document.getElementById('myChart');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode($winnersList['name']) ?>,
+
+                //['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                datasets: [{
+                    label: '# of Votes',
+                    data: <?= json_encode($winnersList['victories']) ?>, //[12, 19, 3, 5, 2, 3],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
