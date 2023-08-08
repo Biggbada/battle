@@ -11,27 +11,27 @@ $db = SPDO::getInstance();
 dump($_SESSION['log']);
 $selectDatas = $db->query('SELECT * FROM players');
 $datas = $selectDatas->fetchAll();
-$playerOne = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
-$playerTwo = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']); // $db->query('DROP TABLE players');
-if (($playerOne->health) > ($playerTwo->health)) {
-    $playerOne->comment = $playerOne->name . " est le vainqueur avec " . $playerOne->health . " points de vie et " . $playerOne->mana . " points de mana";
-    $playerTwo->comment = $playerTwo->name . " a perdu le combat...";
-    $_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / ");
-    SPDO::setWinner($db, $_SESSION["p1_id"], $_SESSION['log'], $_SESSION['fight_id']);
+$player = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
+$adversaire = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']); // $db->query('DROP TABLE players');
+if (($player->health) > ($adversaire->health)) {
+    $player->comment = $player->name . " est le vainqueur avec " . $player->health . " points de vie et " . $player->mana . " points de mana";
+    $adversaire->comment = $adversaire->name . " a perdu le combat...";
+    $_SESSION['log'] = ($_SESSION['log'] . " / " . $player->comment . " / " . $adversaire->comment . " / ");
+    SPDO::setWinner($_SESSION["p1_id"], $_SESSION['log'], $_SESSION['fight_id']);
 }
-if (($playerOne->health) < ($playerTwo->health)) {
-    $playerOne->comment = $playerOne->name . " a perdu le combat...";
-    $playerTwo->comment = $playerTwo->name . " est le vainqueur avec " . $playerTwo->health . " points de vie et " . $playerTwo->mana . " points de mana";
-    $_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / ");
-    SPDO::setWinner($db, $_SESSION["p2_id"], $_SESSION['log'], $_SESSION['fight_id']);
+if (($player->health) < ($adversaire->health)) {
+    $player->comment = $player->name . " a perdu le combat...";
+    $adversaire->comment = $adversaire->name . " est le vainqueur avec " . $adversaire->health . " points de vie et " . $adversaire->mana . " points de mana";
+    $_SESSION['log'] = ($_SESSION['log'] . " / " . $player->comment . " / " . $adversaire->comment . " / ");
+    SPDO::setWinner($_SESSION["p2_id"], $_SESSION['log'], $_SESSION['fight_id']);
 }
 session_destroy();
-// // if (($playerOne->health) === ($playerTwo->health)) {
-// //     $playerOne->comment = "Match nul !";
-// //     $playerTwo->comment = "Match nul !";
+// // if (($player->health) === ($adversaire->health)) {
+// //     $player->comment = "Match nul !";
+// //     $adversaire->comment = "Match nul !";
 // //     SPDO::setWinner($db, "0", $_SESSION['log'], $_SESSION['fight_id']);
 // // }
-// $_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / "); 
+// $_SESSION['log'] = ($_SESSION['log'] . " / " . $player->comment . " / " . $adversaire->comment . " / "); 
 ?>
 
 <head>
@@ -59,27 +59,27 @@ session_destroy();
             </p>
             <div class="col-6 ">
                 <div class="position-relative float-end">
-                    <img id="player" src="https://api.dicebear.com/6.x/avataaars/svg?accessoriesProbability=0&flip=false&seed=<?= $playerOne->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar float-end" alt="Avatar" class="avatar float-end">
+                    <img id="player" src="https://api.dicebear.com/6.x/avataaars/svg?accessoriesProbability=0&flip=false&seed=<?= $player->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar float-end" alt="Avatar" class="avatar float-end">
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        <?= $playerOne->health ?>
+                        <?= $player->health ?>
                     </span>
                     <ul>
-                        <li>Name : <?= $playerOne->name ?></li>
-                        <li>Attaque : <?= $playerOne->power ?></li>
-                        <li>Mana : <?= $playerOne->mana ?></li>
+                        <li>Name : <?= $player->name ?></li>
+                        <li>Attaque : <?= $player->power ?></li>
+                        <li>Mana : <?= $player->mana ?></li>
                     </ul>
                 </div>
             </div>
             <div class="col-6" id="adversaire">
                 <div class="position-relative float-start">
-                    <img src="https://api.dicebear.com/6.x/pixel-art/svg?flip=true&seed=<?= $playerTwo->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar">
+                    <img src="https://api.dicebear.com/6.x/pixel-art/svg?flip=true&seed=<?= $adversaire->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar">
                     <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
-                        <?= $playerTwo->health ?>
+                        <?= $adversaire->health ?>
                     </span>
                     <ul>
-                        <li>Name : <?= $playerTwo->name ?></li>
-                        <li>Attaque : <?= $playerTwo->power ?></li>
-                        <li>Mana : <?= $playerTwo->mana ?></li>
+                        <li>Name : <?= $adversaire->name ?></li>
+                        <li>Attaque : <?= $adversaire->power ?></li>
+                        <li>Mana : <?= $adversaire->mana ?></li>
                     </ul>
                 </div>
             </div>
@@ -92,10 +92,16 @@ session_destroy();
         <div id="combats">
             <h2>Combat</h2>
             <ul>
-                <li><i class="fa-solid fa-khanda p-1"><?= $playerOne->comment ?></i></li>
-                <li><i class="fa-solid fa-khanda p-1"><?= $playerTwo->comment ?></i></li>
+                <li><i class="fa-solid fa-khanda p-1"><?= $player->comment ?></i></li>
+                <li><i class="fa-solid fa-khanda p-1"><?= $adversaire->comment ?></i></li>
             </ul>
         </div>
+    </div>
+    <div class="row">
+        <h2>Voir les stats</h2>
+        <form action="./charts.php" method="post">
+            <input type="submit" value="charts" act>
+        </form>
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {

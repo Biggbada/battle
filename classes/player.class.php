@@ -1,18 +1,22 @@
 <?php
 class Player
 {
-    public string $name;
-    public float $power;
-    public float $mana;
-    public float $health;
-    public string $comment;
+    public int $id;
+    public int $initial_mana;
+    public int $initial_health;
+    public int $initial_pow;
+    public ?string $name;
+    public ?float $power;
+    public ?float $mana;
+    public ?float $health;
+    public ?string $comment;
 
-    public function __construct(string $name, float $power = 100, float $mana = 100, float $health = 100)
+    public function __construct(string $name = null, float $power = null, float $mana = null, float $health = null)
     {
-        $this->name = $name;
-        $this->power = $power;
-        $this->mana = $mana;
-        $this->health = $health;
+        $this->name = $this->name ?? $name;
+        $this->power = $this->initial_pow ?? $power;
+        $this->mana = $this->initial_mana ?? $mana;
+        $this->health = $this->initial_health ?? $health;
     }
     public function attack(Player $player)
     {

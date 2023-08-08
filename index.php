@@ -4,10 +4,7 @@ require './classes/player.class.php';
 require './classes/fight.class.php';
 require './classes/db.class.php';
 
-$db = SPDO::getInstance();
-$selectDatas = $db->query('SELECT * FROM players');
-$datas = $selectDatas->fetchAll();
-$players = SPDO::getPlayers($db);
+$players = SPDO::getPlayers();
 ?>
 
 
@@ -38,7 +35,7 @@ $players = SPDO::getPlayers($db);
                             <select name="player-id" id="player1selector">
                                 <option value="">Select player</option>
 
-                                <?php foreach ($datas as $key => $player) { ?>
+                                <?php foreach ($players as $player) { ?>
                                     <option value=<?= $player['id'] ?>><?= $player['name'] ?></option>
                                 <?php } ?>
 
@@ -72,7 +69,7 @@ $players = SPDO::getPlayers($db);
                             <select name="adversaire-id" id="player2selector">
                                 <option value="">Select player</option>
 
-                                <?php foreach ($datas as $key => $player) { ?>
+                                <?php foreach ($players as $player) { ?>
                                     <option value=<?= $player['id'] ?>><?= $player['name'] ?></option>
                                 <?php } ?>
 

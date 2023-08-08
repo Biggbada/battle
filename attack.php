@@ -8,77 +8,46 @@ require './classes/db.class.php';
 require './repository.php';
 session_start();
 
-$db = SPDO::getInstance();
-
 //cas d'une entrée depuis le formulaire d'inscription des  joueurs
 if (isset($_POST['fight'])) {
-    echo ('first step');
-    // createDb($db);
-
-    //player 1
 
     if (is_numeric($_POST["player-id"])) {
         // jai selectionner un player qui existe en base, j'ai l'id, faut que j'aille chercher le player en bdd
-        $result = $db->prepare("SELECT * from players WHERE id=:id");
-        $result->execute([':id' => $_POST['player-id']]);
-        $selectedPlayer = $result->fetchAll();
-        $playerOne = new Player($selectedPlayer[0]['name'], $selectedPlayer[0]['initial_mana'], $selectedPlayer[0]['initial_health'], $selectedPlayer[0]['initial_pow']);
+        $player = SPDO::getPlayer($_POST["player-id"]);
     } else {
         //je verifie que le nom est pas deja existant en base
-        $requete = $db->prepare("SELECT `name` FROM players WHERE name=:name");
-        $requete->execute([':name' => $_POST['player-name']]);
-        $searchedPlayer = $requete->fetch();
-        $exist = is_array($searchedPlayer);
+        $player = SPDO::getPlayerByName($_POST["player-name"]);
 
-        if ($exist) {
+        if ($player) {
             // je retourne sur la page je previent le mec ca existe deja
             header('Location: ./index.php?error=exist');
-            echo ('le player ' . $_POST['player-name'] . " existe déja");
         } else {
             // j'ai des info sur toutes les data du player et faut que je le créer en base
-
-            $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante'],);
-            SPDO::setPlayer($db, $playerOne->name, $playerOne->mana, $playerOne->health, $playerOne->power);
+            $player_id = SPDO::setPlayer($_POST["player-name"], $_POST["player-mana"], $_POST["player-health"], $_POST["player-power"]);
+            $player = SPDO::getPlayer($player_id);
         }
     }
-
-
-    //player 2
 
     if (is_numeric($_POST["adversaire-id"])) {
         // jai selectionner un player qui existe en base, j'ai l'id, faut que j'aille chercher le player en bdd
-        $result = $db->query("SELECT * from players WHERE id=" . $_POST["adversaire-id"]);
-        $selectedPlayer = $result->fetchAll();
-        $playerTwo = new Player($selectedPlayer[0]['name'], $selectedPlayer[0]['initial_mana'], $selectedPlayer[0]['initial_health'], $selectedPlayer[0]['initial_pow']);
+        $adversaire = SPDO::getPlayer($_POST["adversaire-id"]);
     } else {
         //je verifie que le nom est pas deja existant en base
-        $requete = $db->prepare("SELECT `name` FROM players WHERE name=:name");
-        $requete->execute([':name' => $_POST['adversaire-name']]);
-        $searchedPlayer = $requete->fetch();
-        $exist = is_array($searchedPlayer);
-        // $exist = false;
+        $adversaire = SPDO::getPlayerByName($_POST["adversaire-name"]);
 
-        if ($exist) {
+        if ($adversaire) {
             // je retourne sur la page je previent le mec ca existe deja
-            header('Location: ./index.php');
-            echo ('le player ' . $_POST['player-name'] . " existe déja");
+            header('Location: ./index.php?error=exist');
         } else {
             // j'ai des info sur toutes les data du player et faut que je le créer en base
-            $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante'],);
-            SPDO::setPlayer($db, $playerTwo->name, $playerTwo->mana, $playerTwo->health, $playerTwo->power);
+            $adversaire_id = SPDO::setPlayer($_POST["adversaire-name"], $_POST["adversaire-mana"], $_POST["adversaire-health"], $_POST["adversaire-power"]);
+            $adversaire = SPDO::getPlayer($adversaire_id);
         }
     }
-    // $createFight = $db->prepare('INSERT INTO fights (id_p2) VALUES (:id_pl2)');
-    // $createFight->execute([':id_pl2' => $selectedPlayer[0]['id']]);
 
-    // créer un fight avec player et adversaire
-
-    $fighters = SPDO::getFighters($db, $playerOne->name, $playerTwo->name);
-
-    $createFight = $db->prepare('INSERT INTO fights (id_p1, id_p2) VALUES (:id_pl1, :id_pl2)');
-    $createFight->execute([':id_pl1' => $fighters[0]['id'], ':id_pl2' => $fighters[1]['id']]);
-    $fightID = intval($db->lastInsertId());
-    setSession($fighters, $fightID);
+    $fight_id = SPDO::setFight($player, $adversaire);
+    setSession([$player, $adversaire], $fight_id);
+    dump($_SESSION);
 }
 
 //cas d'une arrive depuis un clic sur attaque
@@ -91,83 +60,82 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     // dump($_SESSION['log']);
     // $selectDatas = $db->query('SELECT * FROM players');
     // $datas = $selectDatas->fetchAll();
-    $playerOne = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
-    $playerTwo = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']);
-    $playerOne->attack($playerTwo);
+    $player = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
+    $adversaire = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']);
+    $player->attack($adversaire);
     $random = rand(0, 1);
-    $_SESSION['p2_mana'] = $playerTwo->mana;
-    $_SESSION['p2_health'] = $playerTwo->health;
-    if ($playerTwo->health <= 0) {
+    $_SESSION['p2_mana'] = $adversaire->mana;
+    $_SESSION['p2_health'] = $adversaire->health;
+    if ($adversaire->health <= 0) {
 
         header('Location: ./resultat.php');
     }
-    if (($playerTwo->health < 50) && ($random === 1)) {
-        $iscured = $playerTwo->cure();
+    if (($adversaire->health < 50) && ($random === 1)) {
+        $iscured = $adversaire->cure();
         if ($iscured === false) {
-            $playerTwo->attack($playerOne);
-            $_SESSION['p1_mana'] = $playerOne->mana;
-            $_SESSION['p1_health'] = $playerOne->health;
+            $adversaire->attack($player);
+            $_SESSION['p1_mana'] = $player->mana;
+            $_SESSION['p1_health'] = $player->health;
         }
     } else {
-        $playerTwo->attack($playerOne);
-        $_SESSION['p1_mana'] = $playerOne->mana;
-        $_SESSION['p1_health'] = $playerOne->health;
-        if ($playerOne->health <= 0) {
+        $adversaire->attack($player);
+        $_SESSION['p1_mana'] = $player->mana;
+        $_SESSION['p1_health'] = $player->health;
+        if ($player->health <= 0) {
             header('Location: ./resultat.php');
         }
     }
-    // SPDO::updateDB($db, $playerOne, $playerTwo);
+    // SPDO::updateDB($db, $player, $adversaire);
     if (isset($_SESSION['log'])) {
-        $_SESSION['log'] = ($_SESSION['log'] . " / " . $playerOne->comment . " / " . $playerTwo->comment . " / ");
+        $_SESSION['log'] = ($_SESSION['log'] . " / " . $player->comment . " / " . $adversaire->comment . " / ");
     } else {
-        $_SESSION['log'] = ($playerOne->comment . " / " . $playerTwo->comment . " / ");
+        $_SESSION['log'] = ($player->comment . " / " . $adversaire->comment . " / ");
     }
 }
 
 //cas d'une arrivée depuis un clic sur se soigner
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
-    $playerOne = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
-    $playerTwo = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']);
+    $player = new Player($_SESSION['p1_name'], $_SESSION['p1_pow'], $_SESSION['p1_mana'], $_SESSION['p1_health']);
+    $adversaire = new Player($_SESSION['p2_name'], $_SESSION['p2_pow'], $_SESSION['p2_mana'], $_SESSION['p2_health']);
 
-    $isCured = $playerOne->cure();
-    $_SESSION['p1_mana'] = $playerOne->mana;
-    $_SESSION['p1_health'] = $playerOne->health;
+    $isCured = $player->cure();
+    $_SESSION['p1_mana'] = $player->mana;
+    $_SESSION['p1_health'] = $player->health;
 
     if ($isCured === false) {
-        $playerOne->attack($playerTwo);
-        if ($playerTwo->health <= 0) {
+        $player->attack($adversaire);
+        if ($adversaire->health <= 0) {
 
             header('Location: ./resultat.php');
         }
-        if (($playerTwo->health < 50) && ($random === 1)) {
-            $iscured = $playerTwo->cure();
+        if (($adversaire->health < 50) && ($random === 1)) {
+            $iscured = $adversaire->cure();
             if ($iscured === false) {
-                $playerTwo->attack($playerOne);
-                $_SESSION['p1_mana'] = $playerOne->mana;
-                $_SESSION['p1_health'] = $playerOne->health;
+                $adversaire->attack($player);
+                $_SESSION['p1_mana'] = $player->mana;
+                $_SESSION['p1_health'] = $player->health;
             }
         } else {
-            $playerTwo->attack($playerOne);
-            $_SESSION['p1_mana'] = $playerOne->mana;
-            $_SESSION['p1_health'] = $playerOne->health;
-            if ($playerOne->health <= 0) {
+            $adversaire->attack($player);
+            $_SESSION['p1_mana'] = $player->mana;
+            $_SESSION['p1_health'] = $player->health;
+            if ($player->health <= 0) {
                 header('Location: ./resultat.php');
             }
         }
 
-        $playerOne->attack($playerTwo);
+        $player->attack($adversaire);
     } else {
-        $playerTwo->attack($playerOne);
-        $_SESSION['player1'] = $playerOne;
+        $adversaire->attack($player);
+        $_SESSION['player1'] = $player;
 
-        if ($playerOne->health < 0) {
+        if ($player->health < 0) {
             echo "end of game";
             header('Location: ./resultat.php');
         }
     }
-    // SPDO::updateDB($db, $playerOne, $playerTwo);
+    // SPDO::updateDB($db, $player, $adversaire);
 }
-
 
 ?>
 
@@ -189,27 +157,27 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
             <h2>Match</h2>
             <div class="col-6 ">
                 <div class="position-relative float-end">
-                    <img id="player" src="https://api.dicebear.com/6.x/avataaars/svg?accessoriesProbability=0&flip=false&seed=<?= $playerOne->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar float-end">
+                    <img id="player" src="https://api.dicebear.com/6.x/avataaars/svg?accessoriesProbability=0&flip=false&seed=<?= $player->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar float-end">
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        <?= $playerOne->health ?>
+                        <?= $player->health ?>
                     </span>
                     <ul>
-                        <li>Name : <?= $playerOne->name ?></li>
-                        <li>Attaque : <?= $playerOne->power ?></li>
-                        <li>Mana : <?= $playerOne->mana ?></li>
+                        <li>Name : <?= $player->name ?></li>
+                        <li>Attaque : <?= $player->power ?></li>
+                        <li>Mana : <?= $player->mana ?></li>
                     </ul>
                 </div>
             </div>
             <div class="col-6" id="adversaire">
                 <div class="position-relative float-start">
-                    <img src="https://api.dicebear.com/6.x/pixel-art/svg?flip=true&seed=<?= $playerTwo->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar">
+                    <img src="https://api.dicebear.com/6.x/pixel-art/svg?flip=true&seed=<?= $adversaire->name ?>&backgroundColor=b6e3f4" alt="Avatar" class="avatar">
                     <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
-                        <?= $playerTwo->health ?>
+                        <?= $adversaire->health ?>
                     </span>
                     <ul>
-                        <li>Name : <?= $playerTwo->name ?></li>
-                        <li>Attaque : <?= $playerTwo->power ?></li>
-                        <li>Mana : <?= $playerTwo->mana ?></li>
+                        <li>Name : <?= $adversaire->name ?></li>
+                        <li>Attaque : <?= $adversaire->power ?></li>
+                        <li>Mana : <?= $adversaire->mana ?></li>
                     </ul>
                 </div>
             </div>
@@ -218,10 +186,10 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
                 <ul>
 
 
-                    <?php if (isset($playerOne->comment)) { ?>
-                        <li><i class="fa-solid fa-khanda p-1"><?= $playerOne->comment ?></i></li><?php } ?>
-                    <?php if (isset($playerTwo->comment)) { ?>
-                        <li><i class="fa-solid fa-khanda p-1"><?= $playerTwo->comment ?></i></li><?php } ?>
+                    <?php if (isset($player->comment)) { ?>
+                        <li><i class="fa-solid fa-khanda p-1"><?= $player->comment ?></i></li><?php } ?>
+                    <?php if (isset($adversaire->comment)) { ?>
+                        <li><i class="fa-solid fa-khanda p-1"><?= $adversaire->comment ?></i></li><?php } ?>
                     </li>
 
                 </ul>
