@@ -1,7 +1,15 @@
 <?php
+
 require_once __DIR__ . '/vendor/autoload.php';
 
+use Dotenv\Dotenv;
+
 require './classes/contact.class.php';
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->safeLoad();
+dump($_ENV);
+// dump(getenv());
 // On vérifie que la méthode POST est utilisée
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     dump($_POST);
@@ -10,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header('Location: index.php');
     } else {
         // On prépare l'URL
-        $url = "https://www.google.com/recaptcha/api/siteverify?secret=6LcrJI0nAAAAAJ4XHQbQIq-TzaDRaqfgQ73AzhCa&response={$_POST['recaptcha-response']}";
+        $url = "https://www.google.com/recaptcha/api/siteverify?secret=" . $_ENV['API_KEY'] . "&response={$_POST['recaptcha-response']}";
 
         // On vérifie si curl est installé
         if (function_exists('curl_version')) {
@@ -64,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Formulaire de contact</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
-    <script src="https://www.google.com/recaptcha/api.js?render=6LcrJI0nAAAAAEuDLlXhm-1d9ux8SjBjWMbvn-ud"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LejS44nAAAAAMlhcZpX9rIKctRxch9MscVsOoy3"></script>
 </head>
 
 <body>
@@ -97,10 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
     </form>
-    <script src="https://www.google.com/recaptcha/api.js?render=6LcrJI0nAAAAAEuDLlXhm-1d9ux8SjBjWMbvn-ud"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LejS44nAAAAAMlhcZpX9rIKctRxch9MscVsOoy3"></script>
     <script>
         grecaptcha.ready(function() {
-            grecaptcha.execute('6LcrJI0nAAAAAEuDLlXhm-1d9ux8SjBjWMbvn-ud', {
+            grecaptcha.execute('6LejS44nAAAAAMlhcZpX9rIKctRxch9MscVsOoy3', {
                 action: 'contact'
             }).then(function(token) {
                 console.log('test');
